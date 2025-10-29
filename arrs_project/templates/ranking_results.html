@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Ranking Results for {{ job.title }}</h2>
+<table class="table table-striped mt-3">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Candidate</th>
+      <th>Score</th>
+      <th>Matched Skills</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rank in rankings %}
+    <tr>
+      <td>{{ rank.rank_position }}</td>
+      <td>{{ rank.resume.user.username }}</td>
+      <td>{{ rank.rank_score|floatformat:2 }}%</td>
+      <td>{{ rank.matched_skills|join:", " }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

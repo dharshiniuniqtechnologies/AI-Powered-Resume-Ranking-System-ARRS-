@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Recruiter Dashboard</h2>
+
+<!-- ✅ Job Creation Form -->
+<div class="card p-4 mb-4">
+  <h4>Post a New Job</h4>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Job Title</label>
+      <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Job Description</label>
+      <textarea name="description" class="form-control" rows="3" required></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Required Skills</label>
+      <input type="text" name="required_skills" class="form-control" placeholder="e.g. Python, NLP, Django">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Experience Required</label>
+      <input type="text" name="experience_required" class="form-control" placeholder="e.g. 2+ years">
+    </div>
+    <button type="submit" class="btn btn-primary">Create Job</button>
+  </form>
+</div>
+
+<!-- ✅ Job List Table -->
+<h4>My Jobs</h4>
+<table class="table table-bordered mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Posted On</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.id }}</td>
+      <td>{{ job.title }}</td>
+      <td>{{ job.created_at|date:"M d, Y" }}</td>
+      <td>
+        <a href="/ranking/{{ job.id }}/" class="btn btn-sm btn-success">View Ranking</a>
+        <a href="/dashboard/rank/{{ job.id }}/" class="btn btn-sm btn-info">Run AI Ranking</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="text-center">No jobs posted yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if message %}
+<div class="alert alert-info mt-4">{{ message }}</div>
+{% endif %}
+
+{% endblock %}
