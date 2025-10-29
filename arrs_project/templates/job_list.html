@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Available Jobs</h2>
+<table class="table table-bordered mt-3">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Skills</th>
+      <th>Experience</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.title }}</td>
+      <td>{{ job.description|truncatechars:100 }}</td>
+      <td>{{ job.required_skills }}</td>
+      <td>{{ job.experience_required }}</td>
+      <td>
+        <a href="/ranking/{{ job.id }}/" class="btn btn-sm btn-success">View Ranking</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
