@@ -11,7 +11,7 @@ from .utils import calculate_similarity, extract_skills
 
 @api_view(['GET'])
 def test_ranking(request):
-    return Response({"message": "Ranking app is working successfully!"})
+    return Response({"message": "Ranking successfully!"})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
