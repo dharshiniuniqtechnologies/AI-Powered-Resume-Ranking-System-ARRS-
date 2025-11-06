@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/resumes/', include('resumes.urls')),
     path('api/ranking/', include('ranking.urls')),
     path('', include('frontend.urls')),   # frontend routes
+    
 ]
 
 if settings.DEBUG:

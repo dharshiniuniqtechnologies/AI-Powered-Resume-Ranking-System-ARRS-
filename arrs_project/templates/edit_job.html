@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4 text-center">✏️ Edit Job</h3>
+
+  <form method="POST" class="shadow p-4 rounded bg-white">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Job Title</label>
+      <input type="text" name="title" class="form-control" value="{{ job.title }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Job Description</label>
+      <textarea name="description" rows="4" class="form-control" required>{{ job.description }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Required Skills</label>
+      <input type="text" name="required_skills" class="form-control" value="{{ job.required_skills }}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Experience Required</label>
+      <input type="text" name="experience_required" class="form-control" value="{{ job.experience_required }}">
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="{% url 'recruiter-dashboard' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

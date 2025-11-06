@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+    <h3 class="text-center mb-4">📝 Post a New Job</h3>
+
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-bold">Job Title</label>
+        <input type="text" name="title" class="form-control" placeholder="e.g. Python Developer" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Job Description</label>
+        <textarea name="description" rows="5" class="form-control" placeholder="Describe the role, required skills, and responsibilities..." required></textarea>
+      </div>
+
+       <div class="mb-3">
+    <label class="form-label">Required Skills</label>
+    <input type="text" name="required_skills" class="form-control" placeholder="e.g. Python, Django, SQL">
+  </div>
+  
+      <div class="mb-3">
+        <label class="form-label fw-bold">Experience Required (Years)</label>
+        <input type="number" name="experience_required" class="form-control" placeholder="e.g. 2">
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-success px-4"> Create Job</button>
+        <a href="{% url 'recruiter-dashboard' %}" class="btn btn-secondary ms-2">← Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

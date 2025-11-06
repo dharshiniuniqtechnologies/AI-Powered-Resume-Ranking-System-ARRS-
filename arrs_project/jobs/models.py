@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User
+from django.conf import settings
 
 class JobDescription(models.Model):
     recruiter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='jobs')
@@ -8,6 +9,10 @@ class JobDescription(models.Model):
     required_skills = models.TextField()
     experience_required = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return self.title
+
+
+

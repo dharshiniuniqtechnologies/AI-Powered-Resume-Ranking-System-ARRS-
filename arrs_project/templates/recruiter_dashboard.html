@@ -1,62 +1,203 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Recruiter Dashboard</h2>
 
-<!-- ✅ Job Creation Form -->
-<div class="card p-4 mb-4">
-  <h4>Post a New Job</h4>
-  <form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label class="form-label">Job Title</label>
-      <input type="text" name="title" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Job Description</label>
-      <textarea name="description" class="form-control" rows="3" required></textarea>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Required Skills</label>
-      <input type="text" name="required_skills" class="form-control" placeholder="e.g. Python, NLP, Django">
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Experience Required</label>
-      <input type="text" name="experience_required" class="form-control" placeholder="e.g. 2+ years">
-    </div>
-    <button type="submit" class="btn btn-primary">Create Job</button>
+<div class="container mt-4">
+  <h2 class="text-center mb-4"> Recruiter Dashboard</h2>
+    <a href="{% url 'create_job' %}" class="btn btn-success"> Add Job</a>
+
+
+
+
+  <!-- Job Selection -->
+  <form method="get" class="text-center mb-3">
+    <label class="fw-bold me-2">Select Job:</label>
+    <select name="job_id" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+      <option value="">-- Choose Job --</option>
+      {% for job in jobs %}
+        <option value="{{ job.id }}" {% if job.id|stringformat:'s' == selected_job %}selected{% endif %}>
+          {{ job.title }}
+        </option>
+      {% endfor %}
+    </select>
   </form>
-</div>
 
-<!-- ✅ Job List Table -->
-<h4>My Jobs</h4>
-<table class="table table-bordered mt-3">
+  {% if selected_job %}
+  <div class="text-end mb-3">
+    <button class="btn btn-outline-primary" onclick="rerunRanking({{ selected_job }})">
+      🔄 Re-Run AI Ranking
+    </button>
+  </div>
+  {% endif %}
+
+  {% if ranked_results %}
+  <div class="card shadow-sm p-3 mb-4">
+    <h5>📋 Saved AI Ranking Results</h5>
+    <table class="table table-striped table-hover text-center mt-3 align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Rank</th>
+          <th>Candidate</th>
+          <th>Final Score</th>
+          <th>Semantic (%)</th>
+          <th>Skill Match (%)</th>
+          <th>Keyword (%)</th>
+          <th>Experience (%)</th>
+          <th>Education (%)</th>
+          <th>Matched Skills</th>
+          <th>Missing Skills</th>
+          <th>Chart</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in ranked_results %}
+        <tr>
+          <td><strong>{{ r.rank }}</strong></td>
+          <td>{{ r.name }}</td>
+          <td><span class="badge bg-primary">{{ r.score }}</span></td>
+          <td>{{ r.details.semantic_similarity }}</td>
+          <td>{{ r.details.skill_match }}</td>
+          <td>{{ r.details.keyword_density }}</td>
+          <td>{{ r.details.experience_score }}</td>
+          <td>{{ r.details.education_score }}</td>
+          <td>
+            {% for s in r.details.matched_skills %}
+              <span class="badge bg-success">{{ s }}</span>
+            {% empty %}
+              <small>–</small>
+            {% endfor %}
+          </td>
+          <td>
+            {% for s in r.details.missing_skills %}
+              <span class="badge bg-danger">{{ s }}</span>
+            {% empty %}
+              <small>–</small>
+            {% endfor %}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-info" onclick="showDetails('{{ r.name }}', {{ r.details|safe }})">
+              View
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <form style="display:none;">
+  {% csrf_token %}
+</form>
+
+  <div class="card shadow-sm p-4 mb-4">
+    <h5 class="text-center mb-3">📈 Score Breakdown</h5>
+    <canvas id="scoreChart" height="100"></canvas>
+  </div>
+
+  {% elif selected_job %}
+  <p class="text-center text-muted mt-5">
+    ⚠️ No ranking results found for this job.<br>
+    Click <strong>“Re-Run AI Ranking”</strong> to generate results.
+  </p>
+  {% else %}
+  <p class="text-center text-muted mt-5">Select a job to view AI results.</p>
+  {% endif %}
+</div>
+<h4 class="mt-4 mb-3">🧾 My Job Listings</h4>
+<table class="table table-striped text-center align-middle">
   <thead class="table-dark">
     <tr>
-      <th>ID</th>
+      <th>#</th>
       <th>Title</th>
+      <th>Experience</th>
       <th>Posted On</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody>
     {% for job in jobs %}
-    <tr>
-      <td>{{ job.id }}</td>
-      <td>{{ job.title }}</td>
-      <td>{{ job.created_at|date:"M d, Y" }}</td>
-      <td>
-        <a href="/ranking/{{ job.id }}/" class="btn btn-sm btn-success">View Ranking</a>
-        <a href="/dashboard/rank/{{ job.id }}/" class="btn btn-sm btn-info">Run AI Ranking</a>
-      </td>
-    </tr>
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ job.title }}</td>
+        <td>{{ job.experience_required }}</td>
+        <td>{{ job.created_at|date:"M d, Y" }}</td>
+        <td>
+          <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-outline-warning">Edit</a>
+          <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger"
+             onclick="return confirm('Are you sure you want to delete this job?');">
+            Delete
+          </a>
+        </td>
+      </tr>
     {% empty %}
-    <tr><td colspan="4" class="text-center">No jobs posted yet.</td></tr>
+      <tr><td colspan="5" class="text-muted">No jobs found. Add one!</td></tr>
     {% endfor %}
   </tbody>
 </table>
 
-{% if message %}
-<div class="alert alert-info mt-4">{{ message }}</div>
-{% endif %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function showDetails(name, details) {
+  const ctx = document.getElementById('scoreChart').getContext('2d');
+
+  const data = {
+    labels: ['Semantic', 'Skill Match', 'Keyword', 'Experience', 'Education'],
+    datasets: [{
+      label: name + "'s Scores",
+      data: [
+        details.semantic_similarity,
+        details.skill_match,
+        details.keyword_density,
+        details.experience_score,
+        details.education_score
+      ],
+      backgroundColor: ['#007bff80','#28a74580','#ffc10780','#17a2b880','#6610f280'],
+      borderColor: ['#007bff','#28a745','#ffc107','#17a2b8','#6610f2'],
+      borderWidth: 1
+    }]
+  };
+
+  if (window.scoreChartInstance) window.scoreChartInstance.destroy();
+  window.scoreChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: { y: { beginAtZero: true, max: 100 } }
+    }
+  });
+}
+
+function getCSRFToken() {
+  return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+function rerunRanking(jobId) {
+  const token = localStorage.getItem("access_token");  // store JWT after login
+  if (!token) {
+    alert("You must be logged in to perform ranking.");
+    return;
+  }
+
+  if (confirm("Re-run AI ranking for this job?")) {
+    fetch(`/api/ranking/rank/${jobId}/`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      alert(data.message || "Ranking completed!");
+      window.location.reload();
+    })
+    .catch(err => alert("Error re-running ranking: " + err));
+  }
+}
+
+
+</script>
 
 {% endblock %}
